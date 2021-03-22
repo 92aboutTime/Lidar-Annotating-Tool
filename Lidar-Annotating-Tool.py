@@ -13,7 +13,7 @@ class LidarAnnotatingTool(QWidget):
         # QFileDialog에서 얻은 fname을 통해 label_list를 만드는 함수.
         label_list = os.listdir(os.path.join(fname, 'lidar', 'lidar_label'))
         return label_list
-
+    
     def initUI(self):
         # 처음에 폴더를 여는 과정 및 첫번째 layout에 들어가는 folder_Qlabel 선언하는 과정
         fname = QFileDialog.getExistingDirectory(self, 'Select a directory', './')
