@@ -4,10 +4,14 @@ from PyQt5.QtGui import *
 from PyQt5.QtCore import Qt
 import os
 
+basic_DataFrame_columns = ['']
+DataFrame_columns = ['tracking ID', 'Height(m)', 'Point Cloud', '동일 ID 유무', '높이 차이(m)', '전프레임과 Type 다름', '전프레임과 거리(m)']
+
 class LidarAnnotatingTool(QWidget):
     def __init__(self):
         super().__init__()
-        # self.read_lines = None # QCombobox에서 어떠한 txt를 선택할 경우 txt 파일을 readlines한 결과
+        self.read_lines = [] # QCombobox에서 어떠한 txt를 선택할 경우 txt 파일을 readlines한 결과
+        self.basic_DataFrame = None
 
         # 처음에 폴더를 여는 과정 및 첫번째 layout에 들어가는 self.folder_Qlabel 선언하는 과정
         self.fname = QFileDialog.getExistingDirectory(self, 'Select a directory', './')
@@ -26,9 +30,17 @@ class LidarAnnotatingTool(QWidget):
         self.label_list = sorted(self.make_label_list(self.fname))
         for label in self.label_list:
             self.label_Combobox.addItem(label)
-        
-        # 클릭하면 
-        self.label_Combobox.currentIndexChanged.connect(self.read_txt)
+
+        self.read_txt()
+         
+        self.label_Combobox.currentIndexChanged.connect(self.read_txt) # 클릭하면 self.read_text 함수 실행하는 부분.
+
+        # 어떤 함수를 만들어서. self.read_text(), self.make_basic_DataFrame(), self.make_DataFrame() 함수를 실행한다.
+        # 실행한 후, QTablewidget 생성 후, 값을 옮겨 담는다.
+        # 그 다음, QTable 값을 변경하지 못하게 하고, 버튼으로만 변경할 수 있게 한다.
+        # 특정 조건들에 걸리면 QTabelwidget에서 글자, 배경의 색깔을 변경하는 것을 만든다.
+        # 만약 수정했을 경우, 수정하는 버튼도 만들어야 한다. 
+        #   우선 수정하는 버튼은 만들지 말고, 수정은 우선 PCL을 모두 사용하여, pointcloud를 보이게 만든 후, 생각한다. 
 
 
         # 첫번째 layout은 수평으로 되어 있으며, self.folder_Qlabel과 self.label_Combobox로 이루어짐.
@@ -41,7 +53,7 @@ class LidarAnnotatingTool(QWidget):
         self.table.setColumnCount(7)
         self.table.setRowCount(40)
         self.table.setHorizontalHeaderLabels(
-            ['tracking ID', 'Height(m)', 'Point Cloud', '동일 ID 유무', '높이 차이(m)', '전프레임과 Type 다름', '전프레임과 거리(m)']
+            DataFrame_columns
             )
         # QTable 배경색 지정하는 방법 : https://alwaysemmyhopes.com/ko/python/715989-how-i-can-change-the-background-color-in-qtablewidget-duplicate-python-pyqt-pyside.html
         # QTable 글자 수정 못하게 하는 방법 : https://m.blog.naver.com/PostView.nhn?blogId=thenaru2&logNo=220788804430&proxyReferer=https:%2F%2Fwww.google.com%2F
@@ -121,10 +133,16 @@ class LidarAnnotatingTool(QWidget):
         self.move(0, 0)
         self.resize(770, 820)
         self.setLayout(self.vbox)
-        self.show()
 
         
-        
+        self.show()
+
+    def make_basic_DataFrame(self):
+        self.basic_DataFrame = pd.DataFrame(self.read_lines, column = basic_DataFrame_columns)
+
+
+    def make_DataFrame(self):
+        a = 0
 
     def make_label_list(self, fname):
         # QFileDialog에서 얻은 fname을 통해 label_list를 만드는 함수.
@@ -139,7 +157,7 @@ class LidarAnnotatingTool(QWidget):
             readlines = f.readlines()
             for i, line in enumerate(readlines):
                 readlines[i] = line.replace("\n", "")
-            # self.read_lines = readlines
+            self.read_lines = readlines
 
 
 
