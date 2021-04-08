@@ -3,15 +3,23 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 from PyQt5.QtCore import Qt
 import os
+import pandas as pd
 
-basic_DataFrame_columns = ['']
-DataFrame_columns = ['tracking ID', 'Height(m)', 'Point Cloud', '동일 ID 유무', '높이 차이(m)', '전프레임과 Type 다름', '전프레임과 거리(m)']
-
+basic_DataFrame_columns = ['Tracking ID', 'Type', 'X', 'Y', 'Z', 'Length', 'Width', 'Height', 'Orientation', 'Det_diff_level']
+DataFrame_columns = ['Tracking ID', 'Height', 'Point Cloud', '동일 ID 유무', '높이 차이', '전프레임과 Type 다름', '전프레임과 거리']
+font_size = 10
 class LidarAnnotatingTool(QWidget):
     def __init__(self):
         super().__init__()
         self.read_lines = [] # QCombobox에서 어떠한 txt를 선택할 경우 txt 파일을 readlines한 결과
         self.basic_DataFrame = None
+        self.DataFrame = None
+        self.first_limit_height = 220
+        self.first_limit_point_cloud = 15
+        self.first_limit_gap_height = 30
+        self.first_limit_distance = 20
+
+
 
         # 처음에 폴더를 여는 과정 및 첫번째 layout에 들어가는 self.folder_Qlabel 선언하는 과정
         self.fname = QFileDialog.getExistingDirectory(self, 'Select a directory', './')
@@ -20,7 +28,7 @@ class LidarAnnotatingTool(QWidget):
         # fname == C:/Users/wq_ysw/Desktop/Project/Lidar-Annotating-Tool/
         self.folder_Qlabel = QLabel(self.fname.split("/")[-1])
         self.folder_Qlabel_font = self.folder_Qlabel.font()
-        self.folder_Qlabel_font.setPointSize(15) # 글자크기
+        self.folder_Qlabel_font.setPointSize(font_size) # 글자크기
         self.folder_Qlabel_font.setBold(True)
         self.folder_Qlabel.setFont(self.folder_Qlabel_font)
 
@@ -76,12 +84,16 @@ class LidarAnnotatingTool(QWidget):
         self.hbox_2.addWidget(self.btn_2)
 
 
+        # 모든 spinBox에 이벤트 처리하는 함수를 작성해야 한다.
+
         # 세번째 layout에 들어가는 제한높이 설정 QSpinBOX를 선언하는 과정
+        # 제한 높아의 단위는 cm, 초기 값은 220cm
         self.limit_height_QLabel = QLabel('제한 높이')
         self.limit_height_spinBox = QSpinBox()
-        self.limit_height_spinBox.setMinimum(1)
-        self.limit_height_spinBox.setMaximum(4)
-        self.limit_height_spinBox.setSingleStep(1)
+        self.limit_height_spinBox.setMinimum(0)
+        self.limit_height_spinBox.setMaximum(300)
+        self.limit_height_spinBox.setSingleStep(10)
+        self.limit_height_spinBox.setValue(self.first_limit_height)
 
 
         # 세번째 layout에 들어가는 제한 PointCloud 갯수를 설정하는 QSpinBOX를 선언하는 과정
@@ -90,23 +102,27 @@ class LidarAnnotatingTool(QWidget):
         self.limit_point_cloud.setMinimum(0)
         self.limit_point_cloud.setMaximum(20)
         self.limit_point_cloud.setSingleStep(1)
+        self.limit_point_cloud.setValue(self.first_limit_point_cloud)
         
 
         # 세번째 layout에 들어가는 높이차이 제한 설정하는 QSpinBOX를 선언하는 과정
+        # 높이차이의 단위는 cm
         self.limit_gap_height_QLabel = QLabel('제한 높이 차이')
         self.limit_gap_height = QSpinBox()
         self.limit_gap_height.setMinimum(0)
-        self.limit_gap_height.setMaximum(2)
-        self.limit_gap_height.setSingleStep(1)
-        
+        self.limit_gap_height.setMaximum(200)
+        self.limit_gap_height.setSingleStep(10)
+        self.limit_gap_height.setValue(self.first_limit_gap_height)
+
 
         # 세번째 layout에 들어가는 거리제한 설정하는 QSpinBOX를 선언하는 과정
+        # 거리제한이란 전 프레임에 동일한 tracking_id 사이의 거리를 의미한다. 거리제한의 단위는 m
         self.limit_distance_QLabel = QLabel('제한 거리')
         self.limit_distance = QSpinBox()
         self.limit_distance.setMinimum(0)
-        self.limit_distance.setMaximum(100)
-        self.limit_distance.setSingleStep(1)
-        
+        self.limit_distance.setMaximum(40)
+        self.limit_distance.setSingleStep(5)
+        self.limit_distance.setValue(self.first_limit_distance)        
 
         self.hbox_3 = QHBoxLayout()
         self.hbox_3.addStretch(1)
@@ -133,8 +149,6 @@ class LidarAnnotatingTool(QWidget):
         self.move(0, 0)
         self.resize(770, 820)
         self.setLayout(self.vbox)
-
-        
         self.show()
 
     def make_basic_DataFrame(self):
@@ -142,13 +156,11 @@ class LidarAnnotatingTool(QWidget):
 
 
     def make_DataFrame(self):
-        a = 0
+        self.DataFrame = pd.DataFrame(columns = DataFrame_columns)
+        self.DataFrame['Tracking ID'] = self.basic_DataFrame['Tracking ID']
+        self.DataFrame['Height'] = self.basic_DataFrame['Height']
+        ############ 지금 여기 하고 있다.
 
-    def make_label_list(self, fname):
-        # QFileDialog에서 얻은 fname을 통해 label_list를 만드는 함수.
-        label_list = os.listdir(os.path.join(fname, 'lidar', 'lidar_label'))
-        return label_list
-    
     def read_txt(self):
         txt = self.label_Combobox.currentText()
         txt_path = os.path.join(self.fname, "lidar", "lidar_label", txt)
@@ -159,9 +171,10 @@ class LidarAnnotatingTool(QWidget):
                 readlines[i] = line.replace("\n", "")
             self.read_lines = readlines
 
-
-
-        
+    def make_label_list(self, fname):
+        # QFileDialog에서 얻은 fname을 통해 label_list를 만드는 함수.
+        label_list = os.listdir(os.path.join(fname, 'lidar', 'lidar_label'))
+        return label_list
 
 
 if __name__=="__main__":
