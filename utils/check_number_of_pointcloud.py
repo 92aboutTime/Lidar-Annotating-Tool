@@ -14,8 +14,8 @@ import math
 import time
 
 # ex_folder = "C:\\Users\\wq_ysw\\Desktop\\Lidar\\07 ex_folder"
-# bin_path = "C:\\Users\\wq_ysw\\Desktop\\Lidar\\06 ex_file\\000000.bin"
-# label_path = "C:\\Users\\wq_ysw\\Desktop\\Lidar\\06 ex_file\\llab_000000.txt"
+bin_path = "C:\\Users\\wq_ysw\\Desktop\\Lidar\\06 ex_file\\000000.bin"
+label_path = "C:\\Users\\wq_ysw\\Desktop\\Lidar\\06 ex_file\\llab_000000.txt"
 
 tracking_id_idx = 0
 type_idx = 1
@@ -168,8 +168,8 @@ def calculate_gradient_and_bias(x1, y1, x2, y2):
 
 
 
-# if __name__ == "__main__":
-#     start = time.time()
-#     result = number_of_pointcloud_in_label(label_path, bin_path)
-#     print(time.time()-start)
-#     print(result)
+if __name__ == "__main__":
+    start = time.time()
+    result = number_of_pointcloud_in_label(label_path, bin_path)
+    print(time.time()-start)
+    print(result)

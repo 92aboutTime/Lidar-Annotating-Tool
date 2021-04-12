@@ -4,14 +4,17 @@ from PyQt5.QtGui import *
 from PyQt5.QtCore import Qt
 import os
 import pandas as pd
+from utils import *
 
 basic_DataFrame_columns = ['Tracking ID', 'Type', 'X', 'Y', 'Z', 'Length', 'Width', 'Height', 'Orientation', 'Det_diff_level']
 DataFrame_columns = ['Tracking ID', 'Height', 'Point Cloud', '동일 ID 유무', '높이 차이', '전프레임과 Type 다름', '전프레임과 거리']
 font_size = 10
+
 class LidarAnnotatingTool(QWidget):
     def __init__(self):
         super().__init__()
         self.read_lines = [] # QCombobox에서 어떠한 txt를 선택할 경우 txt 파일을 readlines한 결과
+        self.label_index = None
         self.basic_DataFrame = None
         self.DataFrame = None
         self.first_limit_height = 220
@@ -36,6 +39,7 @@ class LidarAnnotatingTool(QWidget):
         # 첫번째 layout에 들어가는 combobox에 필요한 label_list를 가져오는 과정 및 combobox 선언하는 과정
         self.label_Combobox = QComboBox(self)
         self.label_list = sorted(self.make_label_list(self.fname))
+        self.bin_list = os.listdir(os.path.join(self.fname, 'lidar', 'lidar')) # bin_list는 .bin파일들의 이름이 담겨있는 list
         for label in self.label_list:
             self.label_Combobox.addItem(label)
 
@@ -60,9 +64,7 @@ class LidarAnnotatingTool(QWidget):
         self.table = QTableWidget()
         self.table.setColumnCount(7)
         self.table.setRowCount(40)
-        self.table.setHorizontalHeaderLabels(
-            DataFrame_columns
-            )
+        self.table.setHorizontalHeaderLabels(DataFrame_columns)
         # QTable 배경색 지정하는 방법 : https://alwaysemmyhopes.com/ko/python/715989-how-i-can-change-the-background-color-in-qtablewidget-duplicate-python-pyqt-pyside.html
         # QTable 글자 수정 못하게 하는 방법 : https://m.blog.naver.com/PostView.nhn?blogId=thenaru2&logNo=220788804430&proxyReferer=https:%2F%2Fwww.google.com%2F
         # QTableWidget : https://wikidocs.net/36797
@@ -159,11 +161,16 @@ class LidarAnnotatingTool(QWidget):
         self.DataFrame = pd.DataFrame(columns = DataFrame_columns)
         self.DataFrame['Tracking ID'] = self.basic_DataFrame['Tracking ID']
         self.DataFrame['Height'] = self.basic_DataFrame['Height']
+        result_dict = number_of_pointcloud_in_label(os.path.join(self.fname, 'lidar', 'lidar_label',  self.label_Combobox.currentText()), os.path.join(self.fname, 'lidar', 'lidar', self.bin_list[self.label_index]))
+        
+        
         ############ 지금 여기 하고 있다.
+
 
     def read_txt(self):
         txt = self.label_Combobox.currentText()
         txt_path = os.path.join(self.fname, "lidar", "lidar_label", txt)
+        self.label_index = self.label_list.index(txt) # 새로운.txt 파일을 클릭하면, 그게 label_list에서 index가 어떻게 되는지 self.label_index에 넣는다.
 
         with open(txt_path, 'r') as f:
             readlines = f.readlines()
