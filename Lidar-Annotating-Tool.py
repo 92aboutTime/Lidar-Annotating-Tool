@@ -4,7 +4,7 @@ from PyQt5.QtGui import *
 from PyQt5.QtCore import Qt
 import os
 import pandas as pd
-from utils import *
+import utils
 
 basic_DataFrame_columns = ['Tracking ID', 'Type', 'X', 'Y', 'Z', 'Length', 'Width', 'Height', 'Orientation', 'Det_diff_level']
 DataFrame_columns = ['Tracking ID', 'Height', 'Point Cloud', '동일 ID 유무', '높이 차이', '전프레임과 Type 다름', '전프레임과 거리']
@@ -141,6 +141,7 @@ class LidarAnnotatingTool(QWidget):
         self.hbox_3.addWidget(self.limit_distance)
         self.hbox_3.addStretch(1)
 
+
         # 마지막에 모든 레이어를 넣어주는 과정이 필요하다.
         self.vbox = QVBoxLayout() # 제일 마지막에 hbox들을 넣어준다.
         self.vbox.addLayout(self.hbox_1)
@@ -161,8 +162,10 @@ class LidarAnnotatingTool(QWidget):
         self.DataFrame = pd.DataFrame(columns = DataFrame_columns)
         self.DataFrame['Tracking ID'] = self.basic_DataFrame['Tracking ID']
         self.DataFrame['Height'] = self.basic_DataFrame['Height']
-        result_dict = number_of_pointcloud_in_label(os.path.join(self.fname, 'lidar', 'lidar_label',  self.label_Combobox.currentText()), os.path.join(self.fname, 'lidar', 'lidar', self.bin_list[self.label_index]))
+        result_dict = utils.check_number_of_pointcloud.number_of_pointcloud_in_label(os.path.join(self.fname, 'lidar', 'lidar_label',  self.label_Combobox.currentText()), os.path.join(self.fname, 'lidar', 'lidar', self.bin_list[self.label_index]))
         
+
+        # self.DataFrame['Point Cloud'] = 
         
         ############ 지금 여기 하고 있다.
 
