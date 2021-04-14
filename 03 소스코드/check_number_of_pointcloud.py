@@ -13,9 +13,9 @@ import struct
 import math
 import time
 
-# ex_folder = "C:\\Users\\wq_ysw\\Desktop\\Lidar\\07 ex_folder"
-# bin_path = "C:\\Users\\wq_ysw\\Desktop\\Lidar\\06 ex_file\\000000.bin"
-# label_path = "C:\\Users\\wq_ysw\\Desktop\\Lidar\\06 ex_file\\llab_000000.txt"
+ex_folder = "C:\\Users\\wq_ysw\\Desktop\\Lidar\\07 ex_folder"
+bin_path = "C:\\Users\\wq_ysw\\Desktop\\Lidar\\06 ex_file\\000000.bin"
+label_path = "C:\\Users\\wq_ysw\\Desktop\\Lidar\\06 ex_file\\llab_000000.txt"
 
 tracking_id_idx = 0
 type_idx = 1
@@ -118,7 +118,7 @@ def number_of_pointcloud_in_label(label_path, bin_path):
                 pcd_in_label = pcd_in_label + 1
                 # print("asd")
 
-        result_dict[label[tracking_id_idx]] = pcd_in_label
+        result_dict[str(int(label[tracking_id_idx]))] = pcd_in_label
 
     return  result_dict
 
@@ -168,8 +168,14 @@ def calculate_gradient_and_bias(x1, y1, x2, y2):
 
 
 
-# if __name__ == "__main__":
-#     start = time.time()
-#     result = number_of_pointcloud_in_label(label_path, bin_path)
-#     print(time.time()-start)
-#     print(result)
+if __name__ == "__main__":
+    start = time.time()
+    result = number_of_pointcloud_in_label(label_path, bin_path)
+    print(time.time()-start)
+    print(result)
+    
+    for key, value in result.items():
+        print(key, value)
+
+    # print(result.values())
+    # print(str(list(result.keys())[0]))

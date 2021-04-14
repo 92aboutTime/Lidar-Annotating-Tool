@@ -162,8 +162,10 @@ class LidarAnnotatingTool(QWidget):
         self.DataFrame = pd.DataFrame(columns = DataFrame_columns)
         self.DataFrame['Tracking ID'] = self.basic_DataFrame['Tracking ID']
         self.DataFrame['Height'] = self.basic_DataFrame['Height']
-        result_dict = utils.check_number_of_pointcloud.number_of_pointcloud_in_label(os.path.join(self.fname, 'lidar', 'lidar_label',  self.label_Combobox.currentText()), os.path.join(self.fname, 'lidar', 'lidar', self.bin_list[self.label_index]))
-        
+        num_pointcloud_dict = utils.check_number_of_pointcloud.number_of_pointcloud_in_label(os.path.join(self.fname, 'lidar', 'lidar_label',  self.label_Combobox.currentText()), os.path.join(self.fname, 'lidar', 'lidar', self.bin_list[self.label_index]))
+        for key, value in num_pointcloud_dict.items():
+            print(str(value))
+            self.DataFrame.loc[key, 'Point Cloud'] = str(value)
 
         # self.DataFrame['Point Cloud'] = 
         
